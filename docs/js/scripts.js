@@ -75,6 +75,8 @@ class Unit{
 		return true;
 	}
 	collision(){
+		this.autokill();
+		
 		this.map.add(this.id, this.getPoints());
 		this.hit(this.col.col(this.getPoints()));
 	}
@@ -90,8 +92,16 @@ class Unit{
 		this.move();
 		this.collision();
 		this.draw();
-		
-		console.log(this.y);	
+			
+	}
+	
+	
+	autokill(){
+		if(this.y > 900){this.kill()};
+	}
+	kill(){
+		delete units[this.id];
+		this.col.remove(this.id);
 	}
 }
 
@@ -102,7 +112,7 @@ const playerMap = new ColObject();
 const enemyMap = new ColObject();
 
 const player = new Unit();
-player.build('player', 200, 700, 50, 100, 0, 5, 0, playerMap, enemyMap, player.img.src = 'player.png');
+player.build('player', 200, 700, 50, 100, 0, 3, 0, playerMap, enemyMap, player.img.src = 'player.png');
 units.player = player;
 
 function get(){
@@ -126,44 +136,85 @@ function getid(base){
 }
 function spawnMine(){
 	let mine = new Unit();
-	mine.build(getid('mine'), Math.floor(Math.random()*400)+50, 0, 50, 50, 1, 0, 7, enemyMap, playerMap, 'mine.png');
+	mine.build(getid('mine'), Math.floor(Math.random()*400)+50, 0, 50, 50, 1, 0, 5, enemyMap, playerMap, 'mine.png');
 	units[mine.id] = mine;
 }
 
-function spawnAsteroid(){
+function spawnAsteroid(spawn, dir){
 	let asteroid = new Unit();
-	asteroid.build(getid('asteroid'),Math.floor(Math.random()*400)+50, 0, 25, 25, 1, 0, 5, enemyMap, playerMap, 'asteroid.png');
+	asteroid.build(getid('asteroid'),spawn, 0, 25, 25, 1, dir, 2, enemyMap, playerMap, 'asteroid.png');
 	units[asteroid.id] = asteroid;
 }
 
-/* 
-function spawn(){
-	let n = Math.random();
+function spawnDebree(){
+	let wall = new Unit();
+	wall.build(getid('wall'),Math.floor(Math.random()*400)+50, 0, 100, 50, 1, 0, 1, enemyMap, playerMap, 'spaceDebree.png');
+	units[wall.id] = wall;
+}
+
+function spawnWall(x){
+	let wall = new Unit();
+	wall.build(getid('wall'),x, 0, 250, 20, 1, 0, 1, enemyMap, playerMap, 'electricWall.png');
+	units[wall.id] = wall;
+}
+
+function spawnmeteorite(){
+	let met = new Unit();
+	met.build(getid('met'),100,0,300, 300, 1, 0, 3, enemyMap, playerMap, 'meteorite.png');
+	units[met.id] = met;
+	setTimeout(function(){met.kill()}, 2340)
+}
+
+
+
+
+function spawnShield(){
 	
-	if (n > .9){}
-	else if (n > .8){}
-	else if (n > .7){}
-	else if (n > .6){}
-	else if (n > .5){spawnMine()}
-	else if (n > .4){}
-	else if (n > .3){}
-	else if (n > .2){spawnAsteroid()}
-	else if (n > .1){}
-	else{return}
-} */
+}
+
+function spawnBoost(){
+	
+}
+
 
 function spawn(){
 	let n = Math.random();
 	
-	if (n > .5){spawnMine()}
-	
+	if (n > .9){spawnmeteorite()}
+	else if (n > .8){spawnShield()}
+	else if (n > .7){spawnWall(0)}
+	else if (n > .6){spawnAsteroid(450, -1)}
+	else if (n > .5){spawnMine()}
+	else if (n > .4){spawnDebree()}
+	else if (n > .3){spawnWall(250)}
+	else if (n > .2){spawnAsteroid(50, 1)}
+	else if (n > .1){spawnBoost()}
+	else{return}
+} 
+
+
+
+var bgLoop = 1;
+const img = new Image();
+
+
+function backgroundLoop(){
+	map.clearRect(0,0,500,1000);
+	map.drawImage(img, 0, 0);
+	img.src = 'bgGIF/space'+bgLoop+'.png';
+	bgLoop++;
+	if(bgLoop>19){bgLoop = 1};
+
 }
+
 
 function animate(){
 	for(let unit of Object.values(units)){
 		unit.loop();
 	}
+
 };
 
+setInterval(backgroundLoop, 300);
 setInterval(animate, 10);
-setInterval(spawn, 1000);
+setInterval(spawn, 1000); 
