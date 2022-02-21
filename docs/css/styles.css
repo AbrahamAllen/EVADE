@@ -1,0 +1,12 @@
+#map{
+	position: absolute;
+	top: 10px;
+	left: 20px;
+}
+
+.button{
+	float: left;
+	width: 250px;
+	height: 1000px;
+	border-style: solid;
+}
