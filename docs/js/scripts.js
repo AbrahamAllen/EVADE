@@ -77,13 +77,17 @@ class Unit{
 	collision(){
 		this.autokill();
 		
-		this.map.add(this.id, this.getPoints());
-		this.hit(this.col.col(this.getPoints()));
+		
+		if(this.hit(this.col.col(this.getPoints()))){this.map.add(this.id, this.getPoints())};
+		
+		
 	}
 	hit(list){
-	if(list.length == 0){return};
-		console.log(list);
-		if(list.includes('player')){gameOver();}
+	if(list.length == 0){return true};
+		console.log(list); if(this.id != 'player'){this.kill()};
+		if(this.id.includes('powerup')){player.upgrade(this.powerup); return};
+		if(list.includes('shield')){units.shield.kill(); return};
+		if(list.includes('player')){gameOver()};
 	
 	}
 	
@@ -96,12 +100,31 @@ class Unit{
 	}
 	
 	
+	upgrade(type){
+		console.log(type);
+		switch(type){
+			case 'shield' : this.giveShield();
+			case 'speed' : this.xs++;
+		}
+	}
+	giveShield(){
+		let shield = new Unit();
+		shield.build('shield', this.x-5, this.y-5, this.w+10, this.h+10, 0, 0, 0, this.map, this.col, 'shield.png');
+		setInterval(function(){shield.follow(player)},10);
+		units.shield = shield;
+	}
+	
+	follow(owner){
+		this.x = owner.x-5;
+		this.y = owner.y-5;
+	}
 	autokill(){
 		if(this.y > 900){this.kill()};
 	}
 	kill(){
 		delete units[this.id];
-		this.col.remove(this.id);
+		this.map.remove(this.id);
+
 	}
 }
 
@@ -127,6 +150,7 @@ function handle(touch){
 
 function gameOver(){
 	alert('YOU LOSE');
+	window.location.replace('index.html');
 }
 
 
@@ -169,11 +193,17 @@ function spawnmeteorite(){
 
 
 function spawnShield(){
-	
+	let shield = new Unit();
+	shield.build(getid('shieldpowerup'),player.x, 0, 75, 75, 1, 0, 1, enemyMap, playerMap, 'shieldPowerup.png');
+	shield.powerup = 'shield';
+	units[shield.id] = shield;
 }
 
 function spawnBoost(){
-	
+	let boost = new Unit();
+	boost.build(getid('boostpowerup'),player.x, 0, 75, 75, 1, 0, 1, enemyMap, playerMap, 'boostPowerup.png');
+	boost.powerup = 'speed';
+	units[boost.id] = boost;
 }
 
 
@@ -183,7 +213,7 @@ function spawn(){
 	if (n > .9){spawnmeteorite()}
 	else if (n > .8){spawnShield()}
 	else if (n > .7){spawnWall(0)}
-	else if (n > .6){spawnAsteroid(450, -1)}
+	else if (n > .6){spawnAsteroid(425, -1)}
 	else if (n > .5){spawnMine()}
 	else if (n > .4){spawnDebree()}
 	else if (n > .3){spawnWall(250)}
@@ -217,4 +247,4 @@ function animate(){
 
 setInterval(backgroundLoop, 300);
 setInterval(animate, 10);
-setInterval(spawn, 1000); 
+setInterval(spawn, 3000); 

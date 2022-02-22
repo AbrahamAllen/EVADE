@@ -4,4 +4,19 @@
 	left: 20px;
 	background-color: black;
 }
+body{
+	font-family: 'Courier New', monospace;
+	background-color: black;
+}
 
+a{
+	color: white;
+	text-decoration: none;	
+}
+
+#newgame{
+	position: absolute;
+	top: 40%;
+	left: 20%;
+	font-size: 100px;
+}
