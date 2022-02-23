@@ -78,17 +78,17 @@ class Unit{
 		this.autokill();
 		
 		
-		if(this.hit(this.col.col(this.getPoints()))){this.map.add(this.id, this.getPoints())};
+		this.hit(this.col.col(this.getPoints()));
+		this.map.add(this.id, this.getPoints());
 		
 		
 	}
 	hit(list){
 	if(list.length == 0){return true};
-		console.log(list); if(this.id != 'player'){this.kill()};
-		if(this.id.includes('powerup')){player.upgrade(this.powerup); return};
-		if(list.includes('shield')){units.shield.kill(); return};
-		if(list.includes('player')){gameOver()};
-	
+		if(this.powerup){player.upgrade(this.powerup); this.kill(); return};
+		if(list.includes('shield')){this.kill(); units.shield.kill()};
+		if(list.includes('player')){gameOver(); this.kill()};
+		
 	}
 	
 	loop(){
@@ -104,7 +104,7 @@ class Unit{
 		console.log(type);
 		switch(type){
 			case 'shield' : this.giveShield();
-			case 'speed' : this.xs++;
+			case 'speed' : this.xs++; changeRate();
 		}
 	}
 	giveShield(){
@@ -137,6 +137,7 @@ const enemyMap = new ColObject();
 const player = new Unit();
 player.build('player', 200, 700, 50, 100, 0, 3, 0, playerMap, enemyMap, player.img.src = 'player.png');
 units.player = player;
+player.points = 10;
 
 function get(){
 	handle(event.clientX);
@@ -149,7 +150,7 @@ function handle(touch){
 }
 
 function gameOver(){
-	alert('YOU LOSE');
+	alert('YOU LOSE \n YOU SCORED ' + player.points +' POINTS');
 	window.location.replace('index.html');
 }
 
@@ -160,7 +161,7 @@ function getid(base){
 }
 function spawnMine(){
 	let mine = new Unit();
-	mine.build(getid('mine'), Math.floor(Math.random()*400)+50, 0, 50, 50, 1, 0, 5, enemyMap, playerMap, 'mine.png');
+	mine.build(getid('mine'), player.x, 0, 50, 50, 1, 0, 5, enemyMap, playerMap, 'mine.png');
 	units[mine.id] = mine;
 }
 
@@ -172,7 +173,7 @@ function spawnAsteroid(spawn, dir){
 
 function spawnDebree(){
 	let wall = new Unit();
-	wall.build(getid('wall'),Math.floor(Math.random()*400)+50, 0, 100, 50, 1, 0, 1, enemyMap, playerMap, 'spaceDebree.png');
+	wall.build(getid('wall'),Math.floor(Math.random()*350)+50, 0, 100, 50, 1, 0, 1, enemyMap, playerMap, 'spaceDebree.png');
 	units[wall.id] = wall;
 }
 
@@ -245,6 +246,34 @@ function animate(){
 
 };
 
+
+function points(){
+	player.points = Math.floor((player.points/10)+player.points);
+	document.getElementById('points').innerText = player.points;
+}
+
+var rate = 3000;
+
 setInterval(backgroundLoop, 300);
 setInterval(animate, 10);
-setInterval(spawn, 3000); 
+var spawnRate = setInterval(spawn, rate); 
+var gainPoints = setInterval(points, rate);
+
+function changeRate(){
+	clearInterval(spawnRate);
+	clearInterval(gainPoints);
+	if(rate > 1000){rate-=500};
+	spawnRate = setInterval(spawn, rate);
+	gainPoints = setInterval(points, rate);
+}
+
+
+function nextTutorial(div){
+	
+	let digits = /[0-9]/d;
+	let loop = div.style.backgroundImage.match(digits);
+	loop = parseInt(loop);
+	loop++;
+	if(loop > 3){loop = 1};
+	div.style.backgroundImage = 'url("tutorial'+loop+'.png")';
+}
